@@ -1,24 +1,40 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 
-export default function SignInForm() {
+export default function RegisterForm() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const res = await signIn("credentials", {
+        const res = await fetch("/api/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            setError(data.error || "Signup failed");
+            return;
+        }
+
+        const loginRes = await signIn("credentials", {
             redirect: false,
             username,
             password,
         });
 
-        if (res?.error) {
-            setError("Invalid username or password");
+        if (!loginRes?.ok) {
+            setError("Login failed after signup");
         } else {
             window.location.href = "/";
         }
@@ -27,10 +43,10 @@ export default function SignInForm() {
     return (
         <form onSubmit={handleSubmit}>
             {error && <p style={{ color: "red" }}>{error}</p>}
+            {success && <p style={{ color: "green" }}>{success}</p>}
             <label>
                 Username
                 <input
-                    name="username"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -39,13 +55,12 @@ export default function SignInForm() {
             <label>
                 Password
                 <input
-                    name="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
             </label>
-            <button type="submit">Sign in</button>
+            <button type="submit">Register</button>
         </form>
     );
 }

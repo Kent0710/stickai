@@ -1,3 +1,5 @@
+// db.ts (or any file name you use)
+
 import {
     boolean,
     timestamp,
@@ -6,15 +8,15 @@ import {
     primaryKey,
     integer,
 } from "drizzle-orm/pg-core";
+import { drizzle } from "drizzle-orm/neon-http";
 
-import { drizzle } from 'drizzle-orm/neon-http';
-export const db = drizzle(process.env.DATABASE_URL!);
-
+// 1. Define schema
 export const users = pgTable("user", {
     id: text("id")
         .primaryKey()
         .$defaultFn(() => crypto.randomUUID()),
-    name: text("name"),
+    name: text("name").unique(),
+    password: text("password").unique(),
     email: text("email").unique(),
     emailVerified: timestamp("emailVerified", { mode: "date" }),
     image: text("image"),
@@ -37,13 +39,7 @@ export const accounts = pgTable(
         id_token: text("id_token"),
         session_state: text("session_state"),
     },
-    (account) => [
-        {
-            compoundKey: primaryKey({
-                columns: [account.provider, account.providerAccountId],
-            }),
-        },
-    ]
+    (account) => [primaryKey(account.provider, account.providerAccountId)]
 );
 
 export const sessions = pgTable("session", {
@@ -61,16 +57,7 @@ export const verificationTokens = pgTable(
         token: text("token").notNull(),
         expires: timestamp("expires", { mode: "date" }).notNull(),
     },
-    (verificationToken) => [
-        {
-            compositePk: primaryKey({
-                columns: [
-                    verificationToken.identifier,
-                    verificationToken.token,
-                ],
-            }),
-        },
-    ]
+    (vt) => [primaryKey(vt.identifier, vt.token)]
 );
 
 export const authenticators = pgTable(
@@ -87,11 +74,16 @@ export const authenticators = pgTable(
         credentialBackedUp: boolean("credentialBackedUp").notNull(),
         transports: text("transports"),
     },
-    (authenticator) => [
-        {
-            compositePK: primaryKey({
-                columns: [authenticator.userId, authenticator.credentialID],
-            }),
-        },
-    ]
+    (a) => [primaryKey(a.userId, a.credentialID)]
 );
+
+// 2. Pass the schema to drizzle
+export const db = drizzle(process.env.DATABASE_URL!, {
+    schema: {
+        users,
+        accounts,
+        sessions,
+        verificationTokens,
+        authenticators,
+    },
+});
