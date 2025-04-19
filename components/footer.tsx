@@ -6,7 +6,7 @@ const Footer : React.FC<FooterProps> = ({
     className
 }) => {
     return (
-        <footer className={` py-10  lg:mt-[0rem] ${className}`}>
+        <footer className={` py-10  lg:mt-[0rem] ${className} text-neutral-500`}>
             <div className="max-w-screen-xl mx-auto px-6">
                 <div className="flex flex-col md:flex-row justify-between items-center">
                     <div className="text-center md:text-left">

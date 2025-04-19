@@ -9,10 +9,10 @@ import googleapaclogo from "@/public/googleapaclogo.webp";
 const Main = () => {
     return (
         <>
-            <main className="flex flex-wrap justify-center px-[4rem]  gap-4 mb-[7rem] mt-4">
+            <main className="flex flex-wrap justify-center px-[4rem]  gap-4 mb-[10rem] mt-4">
                 <section className="space-y-6 w-[60%]">
                     <h2 className="text-5xl lg:text-8xl font-extrabold text-center lg:text-left rounded-2xl  bg-yellow-500">
-                        <span className="text-2xl lg:text-5xl font-semibold bg-blue-400 rounded-2xl px-5 mx-5">
+                        <span className="text-2xl lg:text-4xl font-semibold bg-blue-400 rounded-2xl px-5 mx-5">
                             The Future of
                         </span>{" "}
                         <br />
@@ -27,7 +27,7 @@ const Main = () => {
                             {" "}
                             <Button
                                 variant={"special"}
-                                className="text-4xl px-10 py-10 font-mono"
+                                className="text-4xl px-20 py-10 "
                             >
                                 Get started{" "}
                             </Button>{" "}

@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ isUserLoggedIn }) => {
         <header className="w-full pt-8 pb-4 px-16 flex justify-between items-center">
             <span className="flex items-center gap-2">
                 <Image src={stickailogo} alt="stickai-logo" className="w-10" />
-                <h1 className="text-blue-500"> StickAI </h1>
+                <h1> StickAI </h1>
             </span>
             <nav className="flex items-center gap-6">
                 <ul className="hidden sm:flex gap-6">

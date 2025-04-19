@@ -6,7 +6,8 @@ import { credentialsFormSchema } from "@/app/signIn/credentials-form";
 import { users } from "@/lib/schema";
 import { db } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { signIn } from "next-auth/react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-options";
 
 export async function register(values: z.infer<typeof credentialsFormSchema>) {
     try {
@@ -20,8 +21,8 @@ export async function register(values: z.infer<typeof credentialsFormSchema>) {
         }
 
         const existingUser = await db.query.users.findFirst({
-            where: eq(users.name, username)
-        })
+            where: eq(users.name, username),
+        });
 
         if (existingUser) {
             return {
@@ -38,6 +39,7 @@ export async function register(values: z.infer<typeof credentialsFormSchema>) {
                 name: username,
                 password: hashedPassword,
             })
+            
             .returning();
 
         if (!user) {
@@ -45,7 +47,7 @@ export async function register(values: z.infer<typeof credentialsFormSchema>) {
                 error: "User not created.",
                 success: false,
             };
-        };
+        }
 
         return {
             error: "",
@@ -58,4 +60,23 @@ export async function register(values: z.infer<typeof credentialsFormSchema>) {
             success: false,
         };
     }
+}
+
+export async function getCurrentUser() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return {
+                error: "No session found.",
+                success: false,
+                session: session,
+            };
+        }
+
+        return {
+            error: "",
+            success: true,
+            session: session,
+        };
+    } catch (err) {}
 }

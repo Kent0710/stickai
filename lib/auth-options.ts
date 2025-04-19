@@ -46,13 +46,13 @@ export const authOptions: AuthOptions = {
                     throw new Error("Missing username or password");
                 }
 
-                // 1. Check if the user exists
+           
                 const existingUser = await db.query.users.findFirst({
                     where: eq(users.name, credentials.username),
                 });
 
                 if (!existingUser) {
-                    // User doesn't exist, create a new user (or handle accordingly)
+
                     const [newUser] = await db
                         .insert(users)
                         .values({
@@ -60,34 +60,34 @@ export const authOptions: AuthOptions = {
                             password: await bcrypt.hash(
                                 credentials.password,
                                 10
-                            ), // Hash password
+                            ), 
                         })
                         .returning();
 
-                    // 2. Create session and return the user
-                    const sessionToken = crypto.randomUUID(); // Create a unique session token
+            
+                    const sessionToken = crypto.randomUUID(); 
                     const sessionExpiration = new Date(
                         Date.now() + 30 * 24 * 60 * 60 * 1000
-                    ); // 30 days session expiry
+                    );
 
-                    // 3. Insert session into the database
+                
                     await db.insert(sessions).values({
                         sessionToken,
                         userId: newUser.id,
                         expires: sessionExpiration,
                     });
 
-                    // 4. Return user info (this can include sessionToken if needed)
+              
                     return {
                         id: newUser.id,
                         name: newUser.name,
                         email: newUser.email,
                         image: newUser.image,
-                        sessionToken, // Add sessionToken to response if needed
+                        sessionToken, 
                     };
                 }
 
-                // 3. If user exists, verify the password
+             
                 const isPasswordValid = await bcrypt.compare(
                     credentials.password,
                     existingUser.password
@@ -96,54 +96,28 @@ export const authOptions: AuthOptions = {
                     throw new Error("Invalid username or password");
                 }
 
-                // 4. Create a new session token for the existing user
-                const sessionToken = crypto.randomUUID(); // Generate new session token
+       
+                const sessionToken = crypto.randomUUID();
                 const sessionExpiration = new Date(
                     Date.now() + 30 * 24 * 60 * 60 * 1000
-                ); // 30 days session expiry
+                ); 
 
-                // 5. Insert session into the database
+            
                 await db.insert(sessions).values({
                     sessionToken,
                     userId: existingUser.id,
                     expires: sessionExpiration,
                 });
 
-                // 6. Return the user info (this can include sessionToken if needed)
+               
                 return {
                     id: existingUser.id,
                     name: existingUser.name,
                     email: existingUser.email,
                     image: existingUser.image,
-                    sessionToken, // Add sessionToken to response if needed
+                    sessionToken, 
                 };
             },
-            // async authorize(credentials, req) {
-            //     if (
-            //         !credentials ||
-            //         !credentials.username ||
-            //         !credentials.password
-            //     ) {
-            //         throw new Error("Missing username or password");
-            //     }
-            //     const existingUser = await db.query.users.findFirst({
-            //         where: eq(users.name, credentials.username),
-            //     });
-
-            //     if (!existingUser) {
-            //         const [newUser] = await db
-            //             .insert(users)
-            //             .values({})
-            //             .returning();
-
-            //         if (newUser) {
-            //             return newUser;
-            //         }
-            //         return null;
-            //     }
-
-            //     return existingUser;
-            // },
         }),
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -171,5 +145,17 @@ export const authOptions: AuthOptions = {
         strategy: "database",
         maxAge: 30 * 24 * 60 * 60,
         updateAge: 24 * 60 * 60,
+    },
+    callbacks: {
+        async session({ session }) {
+            if (session && session.user) {
+                const user = await db.query.users.findFirst({
+                    where: eq(users.name, session.user.name as string),
+                });
+                session.user.id = user?.id
+            }
+
+            return session;
+        },
     },
 };

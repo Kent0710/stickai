@@ -8,7 +8,7 @@ export default async function LandingPage() {
     const session = await getServerSession(authOptions);
     return (
         <div className="bg-neutral-900 text-white">
-            <Header isUserLoggedIn={session ? false : true} />
+            <Header isUserLoggedIn={session?.user === null ? true : false} />
             <Main />
             <Footer />
         </div>

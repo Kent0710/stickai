@@ -9,6 +9,11 @@ import {
     integer,
 } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/neon-http";
+import { pgEnum } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { serial } from "drizzle-orm/pg-core";
+
+export const userRoleEnum = pgEnum("user_role", ["owner", "admin", "member"]);
 
 // 1. Define schema
 export const users = pgTable("user", {
@@ -21,6 +26,30 @@ export const users = pgTable("user", {
     emailVerified: timestamp("emailVerified", { mode: "date" }),
     image: text("image"),
 });
+
+export const spaces = pgTable("space", {
+    id: text("id")
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    name: text("name").notNull(),
+    code: text("code").notNull().unique(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+});
+
+export const userSpaces = pgTable(
+    "user_space",
+    {
+        userId: text("user_id")
+            .notNull()
+            .references(() => users.id, { onDelete: "cascade" }),
+        spaceId: text("space_id")
+            .notNull()
+            .references(() => spaces.id, { onDelete: "cascade" }),
+        role: text("role").notNull(), // e.g., 'admin', 'member'
+        joinedAt: timestamp("joined_at", { mode: "date" }).defaultNow(),
+    },
+    (table) => [primaryKey(table.userId, table.spaceId)]
+);
 
 export const accounts = pgTable(
     "account",
@@ -77,6 +106,34 @@ export const authenticators = pgTable(
     (a) => [primaryKey(a.userId, a.credentialID)]
 );
 
+export const userSpacesRelations = relations(userSpaces, ({ one }) => ({
+    space: one(spaces, {
+        fields: [userSpaces.spaceId],
+        references: [spaces.id],
+    }),
+}));
+
+
+export const blocks = pgTable("block", {
+    id: text("id")
+        .primaryKey()
+        .$defaultFn(() => crypto.randomUUID()),
+    spaceId: text("space_id")
+        .notNull()
+        .references(() => spaces.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    x: integer("x").notNull(),
+    y: integer("y").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow(),
+});
+
+export const connections = pgTable("connections", {
+    id: serial("id").primaryKey(),
+    fromBlockId: text("from_block_id").notNull(),
+    toBlockId: text("to_block_id").notNull(),
+    direction: text("direction"), // optional: top, right, etc.
+    spaceId: text("space_id").notNull(),
+});
 // 2. Pass the schema to drizzle
 export const db = drizzle(process.env.DATABASE_URL!, {
     schema: {
@@ -85,5 +142,10 @@ export const db = drizzle(process.env.DATABASE_URL!, {
         sessions,
         verificationTokens,
         authenticators,
+        spaces,
+        userSpaces,
+        userSpacesRelations,
+        blocks,
+        connections,
     },
 });

@@ -55,11 +55,11 @@ export default function SignInClient({ providers }: Props) {
                             <Button
                                 key={provider.name}
                                 onClick={() =>
-                                    signIn(provider.id, { callbackUrl: "/" })
+                                    signIn(provider.id, { callbackUrl: "/home" })
                                 }
                                 variant={"secondary"}
                                 className="w-full flex items-center justify-center"
-                            >
+                            >   
                                 {providerIcons[provider.id] ?? null}
                                 Sign in with {provider.name}
                             </Button>

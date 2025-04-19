@@ -10,9 +10,9 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default:
-                    "py-2 px-4 bg-blue-600 text-primary-foreground shadow-xs hover:bg-blue-600/70  hover:cursor-pointer font-semibold lg:tracking-widee",
+                    "py-2 px-4 bg-blue-600 text-primary-foreground shadow-xs hover:bg-blue-600/70  hover:cursor-pointer font-semibold lg:tracking-wider",
                 special:
-                    " bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:opacity-70 py-10 text-white hover:cursor-pointer",
+                    " bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:opacity-70 py-2 px-4 text-white hover:cursor-pointer",
                 destructive:
                     "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
                 outline:
@@ -21,6 +21,7 @@ const buttonVariants = cva(
                     "py-2 px-4 bg-transparent border border-blue-600 text-blue-600 shadow-xs hover:bg-blue-600/10 border-dashed hover:cursor-pointer",
                 ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
                 link: "text-primary underline-offset-4 hover:underline",
+                dark: "py-2 px-4 bg-neutral-800 text-primary-foreground shadow-xs hover:bg-neutral-800/90  hover:cursor-pointer font-semibold lg:tracking-wider",
             },
             size: {
                 default: "h-9  has-[>svg]:px-3",
